@@ -1,4 +1,4 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, flush, TestBed} from '@angular/core/testing';
 import {CoursesModule} from '../courses.module';
 import {DebugElement} from '@angular/core';
 
@@ -74,21 +74,22 @@ describe('HomeComponent', () => {
   });
 
 
-  xit('should display advanced courses when tab clicked', (done: DoneFn) => {
+  xit('should display advanced courses when tab clicked', fakeAsync(() => {
+    let cardTitles: any;
     coursesService.findAllCourses.and.returnValue(of(setupCourses()));
     fixture.detectChanges();
     const tabs = el.queryAll(By.css('.mat-tab-label'));
     click(tabs[1]);
     fixture.detectChanges();
     setTimeout(() => {
-      const cardTitles = el.queryAll(By.css('.mat-card-title .mat-tab-body-active'));
-      expect(cardTitles.length).toBeGreaterThan(0, 'Could not find card titles');
-      expect(cardTitles[0].nativeElement.textContent).toContain('Angular Security Course');
-      done();
+      cardTitles = el.queryAll(By.css('.mat-card-title .mat-tab-body-active'));
     }, 1000);
+    flush();
+    expect(cardTitles.length).toBeGreaterThan(0, 'Could not find card titles');
+    expect(cardTitles[0].nativeElement.textContent).toContain('Angular Security Course');
 
 
-  });
+  }));
 });
 
 
