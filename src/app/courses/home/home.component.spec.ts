@@ -1,4 +1,4 @@
-import {ComponentFixture, fakeAsync, flush, TestBed} from '@angular/core/testing';
+import {ComponentFixture, fakeAsync, flush, TestBed, waitForAsync} from '@angular/core/testing';
 import {CoursesModule} from '../courses.module';
 import {DebugElement} from '@angular/core';
 
@@ -21,7 +21,7 @@ describe('HomeComponent', () => {
   const beginnerCourses = setupCourses().filter(c => c.category === 'BEGINNER');
   const advancedCourses = setupCourses().filter(c => c.category === 'ADVANCED');
 
-  beforeEach(async() => {
+  beforeEach (waitForAsync(() => {
     const coursesServiceSpy = jasmine.createSpyObj('CoursesService', ['findAllCourses']);
 
     TestBed.configureTestingModule({
@@ -40,7 +40,7 @@ describe('HomeComponent', () => {
         el = fixture.debugElement;
         coursesService = TestBed.inject(CoursesService);
       });
-  });
+  }));
 
   it('should create the component', () => {
     expect(component).toBeTruthy();
@@ -74,21 +74,36 @@ describe('HomeComponent', () => {
   });
 
 
-  xit('should display advanced courses when tab clicked', fakeAsync(() => {
+  it('should display advanced courses when tab clicked', fakeAsync(() => {
     let cardTitles: any;
     coursesService.findAllCourses.and.returnValue(of(setupCourses()));
     fixture.detectChanges();
+
     const tabs = el.queryAll(By.css('.mat-tab-label'));
     click(tabs[1]);
     fixture.detectChanges();
-    setTimeout(() => {
-      cardTitles = el.queryAll(By.css('.mat-card-title .mat-tab-body-active'));
-    }, 1000);
     flush();
+
+    cardTitles = el.queryAll(By.css('.mat-tab-body-active .mat-card-title'));
+
     expect(cardTitles.length).toBeGreaterThan(0, 'Could not find card titles');
     expect(cardTitles[0].nativeElement.textContent).toContain('Angular Security Course');
+  }));
 
+  it('should display advanced courses when tab clicked', waitForAsync(() => {
+    let cardTitles: any;
+    coursesService.findAllCourses.and.returnValue(of(setupCourses()));
+    fixture.detectChanges();
 
+    const tabs = el.queryAll(By.css('.mat-tab-label'));
+    click(tabs[1]);
+    fixture.detectChanges();
+
+    fixture.whenStable().then(() => {
+      cardTitles = el.queryAll(By.css('.mat-tab-body-active .mat-card-title'));
+      expect(cardTitles.length).toBeGreaterThan(0, 'Could not find card titles');
+      expect(cardTitles[0].nativeElement.textContent).toContain('Angular Security Course');
+    });
   }));
 });
 
